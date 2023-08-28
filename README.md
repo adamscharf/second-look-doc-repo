@@ -11,6 +11,7 @@ When an HTTP POST request is made to the Amazon API Gateway endpoint, the AWS La
 Inspiration and code snippets were taken from several Serverless Land Patterns. Learn more about the used patterns and more here:
 
 - [apigw-lambda-dynamodb](https://serverlessland.com/patterns/apigw-lambda-dynamodb)
+- [s3-eventbridge-sfn](https://serverlessland.com/patterns/s3-eventbridge-sfn)
 
 > **Important**: This application uses various AWS services and there are costs associated with these services after the Free Tier usage - please see the [AWS Pricing page](https://aws.amazon.com/pricing/) for details. You are responsible for any AWS costs incurred. No warranty is implied in this example.
 
@@ -46,15 +47,24 @@ Inspiration and code snippets were taken from several Serverless Land Patterns. 
 
 ## How it works
 
-When an HTTP POST request is sent to the Amazon API Gateway endpoint, the AWS Lambda function is invoked and creates a presigned URL which is returned to the client. It also inserts a placeholder item into the Amazon DynamoDB table with a contentUrl link to the future upload location. The client is then able to use the pre-signed URL to upload their file to the S3 bucket.
+### Working
+
+- An HTTP POST request is sent to the Amazon API Gateway endpoint
+- The AWS Lambda function is invoked and does two things:
+    1. Creates a presigned URL for an S3 POST which is returned to the client
+    1. Inserts a placeholder item into the Amazon DynamoDB table with a contentUrl link to the future upload location
+- The client is then able to use the pre-signed URL to upload their file to the S3 bucket
+
+### ToDo
+
+- The Amazon S3 bucket is configured to send any events regarding its content, such as an `Object created` event that is emitted when an object is uploaded to the bucket, to Amazon EventBridge.
+- An Amazon EventBridge rule that triggers a Step Functions workflow if a new `Object created` event is emitted by the S3 bucket. The workflow receives an [EventBridge event message](https://docs.aws.amazon.com/AmazonS3/latest/userguide/ev-events.html) as its input which contains information such as the name of the S3 bucket and the key of the uploaded image.
+- A sample AWS Step Functions workflow is called which invokes a Lambda Function which simulates calling a Malware Detection API, updates the DynamoDB, moves the file to a permenant folder and updates the DynamoDB again.
 
 ## Cleanup
 
-1. Delete the stack
-    ```bash
-    aws cloudformation delete-stack --stack-name STACK_NAME
-    ```
-1. Confirm the stack has been deleted
-    ```bash
-    aws cloudformation list-stacks --query "StackSummaries[?contains(StackName,'STACK_NAME')].StackStatus"
-    ```
+Delete the stack:
+
+```bash
+sam delete
+```
