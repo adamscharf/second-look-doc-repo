@@ -1,0 +1,81 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: API Gateway to Lambda to S3 and DynamoDB
+
+Parameters:
+  DynamoDBTableName:
+    Type: String
+
+Resources:
+  # Creates an Amazon S3 bucket to which docs will be uploaded to trigger our workflow.
+  QuarantineBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      # Amazon EventBridge receives notifications for all events in the bucket.
+      NotificationConfiguration:
+        EventBridgeConfiguration:
+          EventBridgeEnabled: true
+
+  GeneratPresignedUrlFunction:
+    Type: AWS::Serverless::Function
+    Description: 'Lambda function uploads file to s3 bucket'
+    Properties:
+      Handler: main.lambda_handler
+      Runtime: python3.8
+      CodeUri: src/generate-url/
+      MemorySize: 128
+      Environment:
+        Variables:
+          QuarantineBucketName: !Ref QuarantineBucket
+          DynamoDBTableName: !Ref DynamoDBTableName
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref QuarantineBucket
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTableName
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /
+            Method: POST
+      Layers:
+        - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:42
+
+  
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${GeneratPresignedUrlFunction}"
+      RetentionInDays: 7
+
+  # LambdaFunction:
+  #   Type: AWS::Serverless::Function
+  #   Description: 'Lambda function inserts data into DynamoDB table'
+  #   Properties:
+  #     FunctionName: WeatherFunction
+  #     Handler: index.lambda_handler
+  #     Runtime: python3.8
+  #     CodeUri: src/
+  #     Policies:
+  #       DynamoDBCrudPolicy:
+  #         TableName: !Ref DynamoDBTable
+  #     Events:
+  #       ApiEvent:
+  #         Type: Api
+  #         Properties:
+  #           Path: /
+  #           Method: POST
+  
+  DynamoDBTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName: !Ref DynamoDBTableName
+
+Outputs:
+  QuarantineBucketName:
+    Description: "S3 bucket name"
+    Value: !Ref QuarantineBucket
+  EndpointUrl:
+    Description: 'HTTP REST endpoint URL'
+    Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod'
