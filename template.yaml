@@ -42,31 +42,12 @@ Resources:
       Layers:
         - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:42
 
-  
   LogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub "/aws/lambda/${GeneratPresignedUrlFunction}"
       RetentionInDays: 7
 
-  # LambdaFunction:
-  #   Type: AWS::Serverless::Function
-  #   Description: 'Lambda function inserts data into DynamoDB table'
-  #   Properties:
-  #     FunctionName: WeatherFunction
-  #     Handler: index.lambda_handler
-  #     Runtime: python3.8
-  #     CodeUri: src/
-  #     Policies:
-  #       DynamoDBCrudPolicy:
-  #         TableName: !Ref DynamoDBTable
-  #     Events:
-  #       ApiEvent:
-  #         Type: Api
-  #         Properties:
-  #           Path: /
-  #           Method: POST
-  
   DynamoDBTable:
     Type: AWS::Serverless::SimpleTable
     Properties:
