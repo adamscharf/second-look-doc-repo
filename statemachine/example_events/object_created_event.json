@@ -1,0 +1,28 @@
+{
+    "version": "0",
+    "id": "672f6d14-d6ed-3f32-c91d-7794938e5bd9",
+    "detail-type": "Object Created",
+    "source": "aws.s3",
+    "account": "227650818396",
+    "time": "2023-08-30T16:46:41Z",
+    "region": "us-east-1",
+    "resources": [
+        "arn:aws:s3:::sam-app-quarantinebucket-4o330f2ipx5p"
+    ],
+    "detail": {
+        "version": "0",
+        "bucket": {
+            "name": "sam-app-quarantinebucket-4o330f2ipx5p"
+        },
+        "object": {
+            "key": "quarantine/ac6a3040-b32d-4f68-8119-3cba4d05d239/ac6a3040-b32d-4f68-8119-3cba4d05d239.bin",
+            "size": 14,
+            "etag": "bea8252ff4e80f41719ea13cdf007273",
+            "sequencer": "0064EF727110C6C3A6"
+        },
+        "request-id": "3VX7P6MHQ27TCTJW",
+        "requester": "227650818396",
+        "source-ip-address": "75.139.30.141",
+        "reason": "POST Object"
+    }
+}

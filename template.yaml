@@ -108,7 +108,7 @@ Outputs:
     Value: !Ref QuarantineBucket
   EndpointUrl:
     Description: 'HTTP REST endpoint URL'
-    Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/prod/generateUrl'
+    Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod'
   MalwareDetectorStateMachine:
     Description: "Sample State machine to simulate detecting Malware"
     Value: !Ref MalwareDetectorStateMachine
