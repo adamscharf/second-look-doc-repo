@@ -16,7 +16,7 @@ Resources:
         EventBridgeConfiguration:
           EventBridgeEnabled: true
 
-  GeneratPresignedUrlFunction:
+  GeneratePresignedUrlFunction:
     Type: AWS::Serverless::Function
     Description: 'Lambda function uploads file to s3 bucket'
     Properties:
@@ -45,7 +45,7 @@ Resources:
   LogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub "/aws/lambda/${GeneratPresignedUrlFunction}"
+      LogGroupName: !Sub "/aws/lambda/${GeneratePresignedUrlFunction}"
       RetentionInDays: 7
 
   DynamoDBTable:
@@ -59,4 +59,4 @@ Outputs:
     Value: !Ref QuarantineBucket
   EndpointUrl:
     Description: 'HTTP REST endpoint URL'
-    Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod'
+    Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/prod/generateUrl'
