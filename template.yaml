@@ -58,11 +58,15 @@ Resources:
     Properties:
       # The statemachine.asl.json file contains a sample workflow definition.
       DefinitionUri: statemachine/malware-detector-v2.asl.json
+      DefinitionSubstitutions:
+        MalwareDetectorFunctionArn: !GetAtt MalwareDetectorFunction.Arn
       Policies:
         - S3ReadPolicy:
             BucketName: !Ref QuarantineBucket
         - DynamoDBCrudPolicy:
             TableName: !Ref DynamoDBTableName
+        - LambdaInvokePolicy:
+            FunctionName: !Ref MalwareDetectorFunction
       # The Step Functions workflow is triggered each time an object is created in our S3 bucket.
       Events:
         StateChange:
