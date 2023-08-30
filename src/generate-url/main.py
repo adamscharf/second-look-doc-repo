@@ -67,7 +67,7 @@ def create_url():
     id: str = str(uuid.uuid4())
 
     logger.info(f"Generated id: {id}")
-  
+
     object_name: str = f'quarantine/{id}/{id}.bin'
     s3_response = create_presigned_post(s3_bucket_name, object_name)
 
@@ -81,7 +81,7 @@ def create_url():
 
       if dynamodb_response is not None:
         logger.info('HTTP 202 - Created presigned URL and returning it to the user.')
-      
+
         return {
         'statusCode': 202,
         'body': {
