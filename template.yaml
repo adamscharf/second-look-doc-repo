@@ -53,6 +53,55 @@ Resources:
     Properties:
       TableName: !Ref DynamoDBTableName
 
+  MalwareDetectorStateMachine:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      # The statemachine.asl.json file contains a sample workflow definition.
+      DefinitionUri: statemachine/malware-detector-v2.asl.json
+      Policies:
+        - S3ReadPolicy:
+            BucketName: !Ref QuarantineBucket
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTableName
+      # The Step Functions workflow is triggered each time an object is created in our S3 bucket.
+      Events:
+        StateChange:
+          Type: EventBridgeRule
+          Properties:
+            EventBusName: default
+            Pattern:
+              source:
+                - aws.s3
+              detail-type:
+                - Object Created
+              detail:
+                bucket:
+                  name:
+                    - !Ref QuarantineBucket
+
+  MalwareDetectorFunction:
+    Type: AWS::Serverless::Function
+    Description: 'Lambda function scans the uploaded file for malware'
+    Properties:
+      Handler: main.lambda_handler
+      Runtime: python3.8
+      CodeUri: src/malware-detector/
+      MemorySize: 128
+      Environment:
+        Variables:
+          QuarantineBucketName: !Ref QuarantineBucket
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref QuarantineBucket
+      Layers:
+        - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:42
+
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${MalwareDetectorFunction}"
+      RetentionInDays: 7
+
 Outputs:
   QuarantineBucketName:
     Description: "S3 bucket name"
@@ -60,3 +109,6 @@ Outputs:
   EndpointUrl:
     Description: 'HTTP REST endpoint URL'
     Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/prod/generateUrl'
+  MalwareDetectorStateMachine:
+    Description: "Sample State machine to simulate detecting Malware"
+    Value: !Ref MalwareDetectorStateMachine
